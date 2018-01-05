@@ -1,0 +1,60 @@
+sudo apt-mark hold xserver-xorg-core
+apt-get install build-essential nano v4l-utils cmake
+sudo apt-get update && sudo apt-get upgrade
+UseDNS no -> enter into /etc/ssh/sshd_config
+sudo mv /etc/init/lightdm.conf /etc/init/lightdm.conf.disabled
+@reboot /usr/bin/sudo /home/ubuntu/KnightVision/KnightVision
+run setup_sh file to enable usb3 and disable usb autosuspend
+sudo nano /etc/init/tty1.conf
+	replace exec /sbin/getty -8 38400 tty1
+	with exec /bin/login -f team195 < /dev/tty1 > /dev/tty1 2>&1    
+
+
+
+
+
+
+
+/* usbreset -- send a USB port reset to a USB device */
+//Compile and install to /usr/local/bin/usbreset
+//cc usbreset.c -o usbreset
+//chmod 766 usbreset
+//mv usbreset /usr/local/bin/usbreset
+
+#include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/ioctl.h>
+#include <linux/usbdevice_fs.h>
+
+
+int main(int argc, char **argv)
+{
+    const char *filename;
+    int fd;
+    int rc;
+
+    if (argc != 2) {
+        fprintf(stderr, "Usage: usbreset device-filename\n");
+        return 1;
+    }
+    filename = argv[1];
+
+    fd = open(filename, O_WRONLY);
+    if (fd < 0) {
+        perror("Error opening output file");
+        return 1;
+    }
+
+    printf("Resetting USB device %s\n", filename);
+    rc = ioctl(fd, USBDEVFS_RESET, 0);
+    if (rc < 0) {
+        perror("Error in ioctl");
+        return 1;
+    }
+    printf("Reset successful\n");
+
+    close(fd);
+    return 0;
+}
